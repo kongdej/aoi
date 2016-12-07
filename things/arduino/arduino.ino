@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 
-int soil_moisturePin = A0;
-SoftwareSerial ESPserial(2, 3); // RX | TX
+int soil_moisturePin = A5;
+SoftwareSerial ESPserial(3, 5); // RX | TX
 
 void setup() {
   Serial.begin(9600);
@@ -10,10 +10,13 @@ void setup() {
 
 void loop()
 {
-  delay(2000);
-
+  while (ESPserial.available()) {
+      Serial.print("<--");
+      Serial.println(ESPserial.readString());
+  }
   float mos = (1024-analogRead(soil_moisturePin))/1024.0*100.0;
-  Serial.println(mos);
   ESPserial.println(mos);
+  Serial.println(mos);
+  delay(2000);
 }
 
