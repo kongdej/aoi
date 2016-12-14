@@ -1,0 +1,190 @@
+.value {
+	color:#ffffff;
+	background-color: #777777;
+	padding: 2px;
+	margin:2px;
+	width:80px;
+}
+
+.value2 {
+	color:#ffffff;
+	background-color: #777777;
+	padding: 2px;
+	margin:2px;
+	width:91px;
+}
+
+@media only screen and (max-width: 1366px) {
+	.weather {
+		position: absolute;
+		top: 150px;
+		left:330px;
+	}
+	.pump {
+		position: absolute;
+		top: 365px;
+		left:940px;
+	}
+	.light {
+		position: absolute;
+		top: 70px; 
+		left:310px;
+	}
+	.flow {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width:80px;
+		top: 280px;
+		left:400px; 
+	}
+	.ec {
+		position: absolute;
+		top: 480px;
+		left:630px;
+	}
+	.traytemp {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 80px;
+		top: 240px;
+		left:862px;" 
+	}
+	.soil {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 60px;
+		top: 520px;
+		left:352px; 
+	}
+	.rain {
+		position: absolute;
+		color:#ff0000;
+		top: 320px;
+		left:300px;
+	}
+}
+
+
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : portrait) { /* STYLES GO HERE */
+	.weather {
+		position: absolute;
+		top: 200px;
+		left:50px;
+	}
+	.pump {
+		position: absolute;
+		top: 365px;
+		left:676px;
+	}
+	.light {
+		position: absolute;
+		top: 70px; 
+		left:50px;
+	}
+	.flow {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width:80px;
+		top: 290px;
+		left:120px; 
+	}
+	.ec {
+		position: absolute;
+		top: 480px;
+		left:350px;
+	}
+	.traytemp {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 80px;
+		top: 240px;
+		left:700px;" 
+	}
+	.soil {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 60px;
+		top: 520px;
+		left:85px; 
+	}
+	.rain {
+		position: absolute;
+		color:#ff0000;
+		top: 320px;
+		left:50px;
+	}
+}
+
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : landscape) { /* STYLES GO HERE */
+	.weather {
+		position: absolute;
+		top: 200px;
+		left:100px;
+	}
+	.pump {
+		position: absolute;
+		top: 366px;
+		left:778px;
+	}
+	.light {
+		position: absolute;
+		top: 70px; 
+		left:80px;
+	}
+	.flow {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width:80px;
+		top: 300px;
+		left:240px; 
+	}
+	.ec {
+		position: absolute;
+		top: 480px;
+		left:450px;
+	}
+	.traytemp {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 80px;
+		top: 240px;
+		left:700px;" 
+	}
+	.soil {
+		position: absolute;
+		color:#ffffff;
+		background-color: #777777;
+		padding: 2px;
+		width: 60px;
+		top: 520px;
+		left:190px; 
+	}
+	.rain {
+		position: absolute;
+		color:#ff0000;
+		top: 320px;
+		left:100px;
+	}
+}
