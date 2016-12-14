@@ -8,8 +8,8 @@
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1015 ads(0x48);     /* Use thi for the 12-bit version */
 
-const char* ssid     = "ZAB";
-const char* password = "Gearman1";
+const char* ssid     = "BAZ";
+const char* password = "gearman1";
 // Update these with values suitable for your network.
 IPAddress ip(192,168,1,17);  //Node static IP
 IPAddress gateway(192,168,1,1);
