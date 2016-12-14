@@ -7,8 +7,6 @@
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 Adafruit_ADS1015 ads(0x48);     /* Use thi for the 12-bit version */
-float v1=0.0;
-float v2=0.0;
 
 const char* ssid     = "ZAB";
 const char* password = "Gearman1";
@@ -20,9 +18,15 @@ IPAddress subnet(255,255,255,0);
 #define APPID   "AOI"
 #define KEY     "r7P03akJkOtFOlM"
 #define SECRET  "uwUVFN7vfrXdaefP8663i0qia"
-#define ALIAS   "zone1"
+#define ALIAS   "nodemcu"
 
 WiFiClient client;
+
+float v1,v2,v3,v4;
+
+int pump = D5;
+int valve1 = D6;
+int valve2 = D7;
 
 int timer = 0;
 MicroGear microgear(client);
@@ -31,7 +35,46 @@ MicroGear microgear(client);
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
     Serial.print("Incoming message --> ");
     msg[msglen] = '\0';
+    Serial.print(topic);
     Serial.println((char *)msg);
+    if (String(topic) == "/AOI/cmd") {      
+      if (msg[0] == '1') {
+        Serial.print("PUMP -> ");        
+        if (msg[1] == '1') {
+          Serial.println("ON");
+          digitalWrite(pump,HIGH);
+          delay(500);
+          if (digitalRead(pump) == HIGH) {       
+            microgear.publish("/status","11");
+          }
+          else {
+            microgear.publish("/status","10");            
+          }
+        }
+        else if (msg[1] == '0') {
+          Serial.println("OFF");                  
+        }
+      }
+      if (msg[0] == '2') {
+        Serial.print("VALVE 1 -> ");        
+        if (msg[1] == '1') {
+          Serial.println("ON");        
+        }
+        else if (msg[1] == '0') {
+          Serial.println("OFF");                  
+        }
+      }
+      if (msg[0] == '3') {
+        Serial.print("VALVE 2 -> ");        
+        if (msg[1] == '1') {
+          Serial.println("ON");        
+        }
+        else if (msg[1] == '0') {
+          Serial.println("OFF");                  
+        }
+      }
+      
+    }
 }
 
 void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
@@ -53,8 +96,7 @@ void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.println("Connected to NETPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.setAlias(ALIAS);
-    microgear.subscribe("/zone1/mosture/1");
-    microgear.subscribe("/zone1/mosture/2");
+    microgear.subscribe("/cmd");
 }
 
 
@@ -99,18 +141,9 @@ void setup() {
     Serial.println(WiFi.localIP());
     /*-- END OTA Setup --*/
 
-    /* Initial WIFI, this is just a basic method to configure WIFI on ESP8266.                       */
-    /* You may want to use other method that is more complicated, but provide better user experience */
-    if (WiFi.begin(ssid, password)) {
-        while (WiFi.status() != WL_CONNECTED) {
-            delay(500);
-            Serial.print(".");
-        }
-    }
-
     microgear.init(KEY,SECRET,ALIAS);
     microgear.connect(APPID);
-    ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+//    ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
     ads.begin();
 }
 
@@ -121,28 +154,33 @@ void loop() {
 
     /* To check if the microgear is still connected */
     if (microgear.connected()) {
-        Serial.println("connected");
+//        Serial.println("connected");
 
         /* Call this method regularly otherwise the connection may be lost */
         microgear.loop();
 
         if (timer >= 1000) {
-            Serial.println("Publish...");
+     //       Serial.println("Publish...");
 
             /* Chat with the microgear named ALIAS which is myself */
             adc0 = ads.readADC_SingleEnded(0);
             adc1 = ads.readADC_SingleEnded(1);
             adc2 = ads.readADC_SingleEnded(2);
             adc3 = ads.readADC_SingleEnded(3);
-            v1= (adc0*2.0)/1000;
-            char buff1[50];
-            dtostrf(v1,7, 3, buff1);
-            v2= (adc1*2.0)/1000;
-            char buff2[50];
-            dtostrf(v2,7, 3, buff2);
-            char msg[50];
-            sprintf(msg, "%s,%s", buff1,buff2);
-            microgear.publish("/zone1",msg);
+
+            char msg[100],buff1[50],buff2[50],buff3[50],buff4[50];
+
+            v1 = 100 - ((adc0*3.0)/1000)/3.3*100;
+            v2 = 100 - ((adc1*3.0)/1000)/3.3*100;
+            v3 = 100 - ((adc2*3.0)/1000)/3.3*100;
+            v4 = (adc3*3.0)/1000*5;
+            dtostrf(v1,3, 2, buff1);
+            dtostrf(v2,3, 2, buff2);
+            dtostrf(v3,3, 2, buff3);
+            dtostrf(v4,3, 2, buff4);
+            sprintf(msg, "%s,%s,%s,%s", buff1,buff2,buff3,buff4);
+            Serial.println(msg);
+            microgear.publish("/data",msg);
             timer = 0;
         } 
         else timer += 100;

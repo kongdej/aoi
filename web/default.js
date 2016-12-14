@@ -32,7 +32,8 @@
     microgear.on('connected', function() {
         printMsg('Init',"Connected to NETPIE...");
         microgear.setAlias(ALIAS);
-        microgear.subscribe("/zone1");
+        microgear.subscribe("/data");
+        microgear.subscribe("/cmd");
     });
 
     microgear.on('present', function(event) {
@@ -47,4 +48,35 @@
 
     microgear.resettoken(function(err) {
         microgear.connect(APPID);
+    });
+
+    $("#r1on").click(function () {
+        console.log("on");
+        microgear.publish ("/cmd", "11");
+    });
+
+    $("#r1off").click(function () {
+        console.log("off");
+        microgear.publish ("/cmd", "10");
+    });
+
+    $("#v1on").click(function () {
+        console.log("on");
+        microgear.publish ("/cmd", "21");
+    });
+
+    $("#v1off").click(function () {
+        console.log("off");
+        microgear.publish ("/cmd", "20");
+    });
+
+
+    $("#v2on").click(function () {
+        console.log("on");
+        microgear.publish ("/cmd", "31");
+    });
+
+    $("#v2off").click(function () {
+        console.log("off");
+        microgear.publish ("/cmd", "30");
     });
