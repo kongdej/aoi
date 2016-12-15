@@ -24,11 +24,17 @@ WiFiClient client;
 
 float v1,v2,v3,v4;
 
-int pump = D5;
-int valve1 = D6;
-int valve2 = D7;
-
+int relay[4] = {D5,D6,D7,D8};
 int timer = 0;
+
+void relayOperation(uint8_t* msg) {
+  int rac = msg[1] == '1' ? HIGH:LOW;
+  msg[1] = '\0';
+  int rno = relay[String((char *)msg).toInt()];
+  Serial.printf("Relay %d -> %d \r\n",rno,rac);
+  digitalWrite(rno,rac);
+}
+
 MicroGear microgear(client);
 
 /* If a new message arrives, do this */
@@ -38,42 +44,7 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
     Serial.print(topic);
     Serial.println((char *)msg);
     if (String(topic) == "/AOI/cmd") {      
-      if (msg[0] == '1') {
-        Serial.print("PUMP -> ");        
-        if (msg[1] == '1') {
-          Serial.println("ON");
-          digitalWrite(pump,HIGH);
-          delay(500);
-          if (digitalRead(pump) == HIGH) {       
-            microgear.publish("/status","11");
-          }
-          else {
-            microgear.publish("/status","10");            
-          }
-        }
-        else if (msg[1] == '0') {
-          Serial.println("OFF");                  
-        }
-      }
-      if (msg[0] == '2') {
-        Serial.print("VALVE 1 -> ");        
-        if (msg[1] == '1') {
-          Serial.println("ON");        
-        }
-        else if (msg[1] == '0') {
-          Serial.println("OFF");                  
-        }
-      }
-      if (msg[0] == '3') {
-        Serial.print("VALVE 2 -> ");        
-        if (msg[1] == '1') {
-          Serial.println("ON");        
-        }
-        else if (msg[1] == '0') {
-          Serial.println("OFF");                  
-        }
-      }
-      
+      relayOperation(msg);     
     }
 }
 
@@ -94,7 +65,6 @@ void onLostgear(char *attribute, uint8_t* msg, unsigned int msglen) {
 /* When a microgear is connected, do this */
 void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.println("Connected to NETPIE...");
-    /* Set the alias of this microgear ALIAS */
     microgear.setAlias(ALIAS);
     microgear.subscribe("/cmd");
 }
@@ -116,7 +86,7 @@ void setup() {
     while (WiFi.waitForConnectResult() != WL_CONNECTED) {
       Serial.println("Connection Failed! Rebooting...");
       delay(5000);
-      ESP.restart();
+//      ESP.restart();
     }
     ArduinoOTA.onStart([]() {
       Serial.println("Start");
@@ -145,6 +115,10 @@ void setup() {
     microgear.connect(APPID);
 //    ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
     ads.begin();
+    for (int i=0; i<4; i++) {
+      pinMode(relay[i], OUTPUT);
+    }
+    
 }
 
 void loop() {
@@ -178,9 +152,10 @@ void loop() {
             dtostrf(v2,3, 2, buff2);
             dtostrf(v3,3, 2, buff3);
             dtostrf(v4,3, 2, buff4);
-            sprintf(msg, "%s,%s,%s,%s", buff1,buff2,buff3,buff4);
+            sprintf(msg, "%s,%s,%s,%s,%d,%d,%d,%d", buff1,buff2,buff3,buff4,digitalRead(relay[0]),digitalRead(relay[1]),digitalRead(relay[2]),digitalRead(relay[3]));
             Serial.println(msg);
             microgear.publish("/data",msg);
+            delay(500);
             timer = 0;
         } 
         else timer += 100;

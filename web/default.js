@@ -27,6 +27,16 @@
 
     microgear.on('message',function(topic,msg) {
         printMsg(topic,msg);
+        if (topic == "/AOI/data") {
+           var vals = msg.split(",");
+           console.log(vals);
+           if (vals[4] == '1') $('#r1_status').text('ON'); else $('#r1_status').text('OFF');                
+           if (vals[5] == '1') $('#r2_status').text('ON'); else $('#r2_status').text('OFF');                
+           if (vals[6] == '1') $('#r3_status').text('ON'); else $('#r3_status').text('OFF');                
+           if (vals[7] == '1') $('#r4_status').text('ON'); else $('#r4_status').text('OFF');                
+         }
+ 
+
     });
 
     microgear.on('connected', function() {
@@ -52,31 +62,41 @@
 
     $("#r1on").click(function () {
         console.log("on");
-        microgear.publish ("/cmd", "11");
+        microgear.publish ("/cmd", "01");
     });
 
     $("#r1off").click(function () {
         console.log("off");
-        microgear.publish ("/cmd", "10");
+        microgear.publish ("/cmd", "00");
     });
 
     $("#v1on").click(function () {
         console.log("on");
-        microgear.publish ("/cmd", "21");
+        microgear.publish ("/cmd", "11");
     });
 
     $("#v1off").click(function () {
         console.log("off");
-        microgear.publish ("/cmd", "20");
+        microgear.publish ("/cmd", "10");
     });
 
 
     $("#v2on").click(function () {
         console.log("on");
-        microgear.publish ("/cmd", "31");
+        microgear.publish ("/cmd", "21");
     });
 
     $("#v2off").click(function () {
+        console.log("off");
+        microgear.publish ("/cmd", "20");
+    });
+
+    $("#v3on").click(function () {
+        console.log("on");
+        microgear.publish ("/cmd", "31");
+    });
+
+    $("#v3off").click(function () {
         console.log("off");
         microgear.publish ("/cmd", "30");
     });
