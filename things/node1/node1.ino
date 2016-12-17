@@ -6,7 +6,11 @@
 
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
-Adafruit_ADS1015 ads(0x48);     /* Use thi for the 12-bit version */
+Adafruit_ADS1115 ads;     /* Use thi for the 12-bit version */
+
+// Light sensor : SCL-SCL(GPIO5)  D1, SDA-SDA(GPIO4)  D2, ADD-NC or GND 
+//#include <BH1750.h>
+//BH1750 lightMeter;
 
 const char* ssid     = "BAZ";
 const char* password = "gearman1";
@@ -22,9 +26,8 @@ IPAddress subnet(255,255,255,0);
 
 WiFiClient client;
 
-float v1,v2,v3,v4;
-
 int relay[4] = {D5,D6,D7,D8};
+int analogPin = A0;
 int timer = 0;
 
 void relayOperation(uint8_t* msg) {
@@ -113,46 +116,42 @@ void setup() {
 
     microgear.init(KEY,SECRET,ALIAS);
     microgear.connect(APPID);
-//    ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
     ads.begin();
     for (int i=0; i<4; i++) {
       pinMode(relay[i], OUTPUT);
     }
-    
+//    lightMeter.begin(); 
 }
 
 void loop() {
     ArduinoOTA.handle();
-    int16_t adc0, adc1, adc2, adc3;
 
+    int16_t adc0, adc1, adc2, adc3, voltbit;
+    float v1,v2,v3,v4,v5;
+    char msg[100],buff1[50],buff2[50],buff3[50],buff4[50],buff5[50];
 
-    /* To check if the microgear is still connected */
     if (microgear.connected()) {
-//        Serial.println("connected");
-
-        /* Call this method regularly otherwise the connection may be lost */
         microgear.loop();
 
         if (timer >= 1000) {
-     //       Serial.println("Publish...");
-
-            /* Chat with the microgear named ALIAS which is myself */
             adc0 = ads.readADC_SingleEnded(0);
             adc1 = ads.readADC_SingleEnded(1);
             adc2 = ads.readADC_SingleEnded(2);
             adc3 = ads.readADC_SingleEnded(3);
-
-            char msg[100],buff1[50],buff2[50],buff3[50],buff4[50];
-
-            v1 = 100 - ((adc0*3.0)/1000)/3.3*100;
-            v2 = 100 - ((adc1*3.0)/1000)/3.3*100;
-            v3 = 100 - ((adc2*3.0)/1000)/3.3*100;
-            v4 = (adc3*3.0)/1000*5;
+            voltbit = analogRead(analogPin);
+            v1 = 100 - ((adc0*0.1875)/1000)/3.3*100;
+            v2 = 100 - ((adc1*0.1875)/1000)/3.3*100;
+            v3 = 100 - ((adc2*0.1875)/1000)/3.3*100;
+            v4 = 100 - ((adc3*0.1875)/1000)/3.3*100;
+            v5 = (voltbit/1023.0)*3.3*5.0*1.031; //0.024
+  //          uint16_t lux = lightMeter.readLightLevel();
+            uint16_t lux=0;
             dtostrf(v1,3, 2, buff1);
             dtostrf(v2,3, 2, buff2);
             dtostrf(v3,3, 2, buff3);
             dtostrf(v4,3, 2, buff4);
-            sprintf(msg, "%s,%s,%s,%s,%d,%d,%d,%d", buff1,buff2,buff3,buff4,digitalRead(relay[0]),digitalRead(relay[1]),digitalRead(relay[2]),digitalRead(relay[3]));
+            dtostrf(v5,3, 2, buff5);
+            sprintf(msg, "%s,%s,%s,%s,%d,%d,%d,%d,%s,%d", buff1,buff2,buff3,buff4,digitalRead(relay[0]),digitalRead(relay[1]),digitalRead(relay[2]),digitalRead(relay[3]),buff5,lux);
             Serial.println(msg);
             microgear.publish("/data",msg);
             delay(500);
