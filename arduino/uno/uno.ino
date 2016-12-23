@@ -10,6 +10,7 @@ void setup() {
 
 void loop() {
   float soil_moisture[4] = {0,0,0,0};
+  float volt=0.0;
   float h_air = dht.readHumidity();
   float t_air = dht.readTemperature();
 
@@ -19,9 +20,13 @@ void loop() {
     h_air = -1;
   }
 
-  for(int i; i<4; i++) {
-    soil_moisture[i] = (1023-analogRead(i))/1023.0*100.0;
-    Serial.print(soil_moisture[i]);
+  volt = (analogRead(0)/1023.0)*25.0*0.993;
+  Serial.print(volt);
+  Serial.print(',');
+
+  for(int i=1; i<5; i++) {
+    soil_moisture[i-1] = (1023-analogRead(i))/1023.0*100.0;
+    Serial.print(soil_moisture[i-1]);
     Serial.print(',');
   }
   Serial.print(t_air);
