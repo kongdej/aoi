@@ -24,16 +24,34 @@
        document.getElementById("data").innerHTML = '&nbsp;<i class="fa fa-bell-o"></i> '+ datetime + ' # ' +topic+' <i class="fa fa-ellipsis-h"></i> ' + msg;
     }
 
-
+    first=0;
     microgear.on('message',function(topic,msg) {
         printMsg(topic,msg);
         if (topic == "/AOI/data") {
            var vals = msg.split(",");
            console.log(vals);
-           if (vals[4] == '1') $('#r1_status').text('ON'); else $('#r1_status').text('OFF');                
-           if (vals[5] == '1') $('#r2_status').text('ON'); else $('#r2_status').text('OFF');                
-           if (vals[6] == '1') $('#r3_status').text('ON'); else $('#r3_status').text('OFF');                
-           if (vals[7] == '1') $('#r4_status').text('ON'); else $('#r4_status').text('OFF');                
+           if (vals[0] == '1') $('#r1_status').text('ON'); else $('#r1_status').text('OFF');                
+           if (vals[1] == '1') $('#r2_status').text('ON'); else $('#r2_status').text('OFF');                
+           if (vals[2] == '1') $('#r3_status').text('ON'); else $('#r3_status').text('OFF');                
+           if (vals[3] == '1') $('#r4_status').text('ON'); else $('#r4_status').text('OFF'); 
+            $('#m1').text(vals[10]+'%');               
+            $('#m2').text(vals[11]+'%');
+            $('#m3').text(vals[12]+'%');
+            $('#volt').text(vals[9]+'V');
+            if (first <= 1) {
+                $('#sp_1').val(vals[4]);
+                $('#sp_2').val(vals[5]);
+                $('#sp_3').val(vals[6]);
+                $('#ton').val(vals[7]);
+                $('#toff').val(vals[8]);
+                console.log('55');
+                first++;
+            }
+            $('#sp_1o').text(vals[4]+'%');
+            $('#sp_2o').text(vals[5]+'%');
+            $('#sp_3o').text(vals[6]+'%');
+            $('#tono').text(vals[7]+'s');
+            $('#toffo').text(vals[8]+'s');
          }
  
 
@@ -44,6 +62,7 @@
         microgear.setAlias(ALIAS);
         microgear.subscribe("/data");
         microgear.subscribe("/cmd");
+        microgear.subscribe("/sp");
     });
 
     microgear.on('present', function(event) {
@@ -99,4 +118,9 @@
     $("#v3off").click(function () {
         console.log("off");
         microgear.publish ("/cmd", "30");
+    });
+
+    $("#sp_submit").click(function () {
+        console.log($('#sp_1').val()+','+$('#sp_2').val()+','+$('#sp_3').val()+','+$('#ton').val()+','+$('#toff').val());
+        microgear.publish ("/sp", $('#sp_1').val()+','+$('#sp_2').val()+','+$('#sp_3').val()+','+$('#ton').val()+','+$('#toff').val());
     });
