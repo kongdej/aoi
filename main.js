@@ -24,27 +24,15 @@
        document.getElementById("data").innerHTML = '&nbsp;<i class="fa fa-bell-o"></i> '+ datetime + ' # ' +topic+' <i class="fa fa-ellipsis-h"></i> ' + msg;
     }
 
-    first=0;
     microgear.on('message',function(topic,msg) {
         printMsg(topic,msg);
         if (topic == "/AOI/data") {
            var vals = msg.split(",");
            console.log(vals);
-           if (vals[0] == '1') $('#r1_status').text('ON'); else $('#r1_status').text('OFF');                
-           if (vals[1] == '1') $('#r2_status').text('ON'); else $('#r2_status').text('OFF');                
-           if (vals[2] == '1') $('#r3_status').text('ON'); else $('#r3_status').text('OFF');                
-           if (vals[3] == '1') $('#r4_status').text('ON'); else $('#r4_status').text('OFF'); 
-            if (first <= 1) {
-                $('#sp_1').val(vals[4]);
-                $('#sp_2').val(vals[5]);
-                $('#sp_3').val(vals[6]);
-                $('#ton').val(vals[7]);
-                $('#toff').val(vals[8]);
-                $('#hstart').val(vals[9]);
-                $('#hstop').val(vals[10]);
-                console.log('55');
-                first++;
-            }
+           if (vals[0] == '1') $('#r1_status').text('START'); else $('#r1_status').text('STOP');                
+           if (vals[1] == '1') $('#r2_status').text('OPEN'); else $('#r2_status').text('CLOSE');                
+           if (vals[2] == '1') $('#r3_status').text('OPEN'); else $('#r3_status').text('CLOSE');                
+           if (vals[3] == '1') $('#r4_status').text('OPEN'); else $('#r4_status').text('CLOSE'); 
             $('#volt').text(vals[11]+'V');
             $('#m1').text(vals[12]+'%');               
             $('#m2').text(vals[13]+'%');
@@ -55,8 +43,16 @@
             $('#sp_3o').text(vals[6]+'%');
             $('#tono').text(vals[7]+'s');
             $('#toffo').text(vals[8]+'s');
-            $('#hstarto').text(vals[9]+'s');
-            $('#hstopo').text(vals[10]+'s');
+            $('#hstarto').text(vals[9]+':00');
+            $('#hstopo').text(vals[10]+':00');
+            
+            gM1.refresh(vals[12]);
+            gM2.refresh(vals[13]);
+            gM3.refresh(vals[14]);
+            gM4.refresh(vals[15]);
+            gT.refresh(vals[16]);
+            gH.refresh(vals[17]);
+
          }
  
 
@@ -129,3 +125,96 @@
         console.log($('#sp_1').val()+','+$('#sp_2').val()+','+$('#sp_3').val()+','+$('#ton').val()+','+$('#toff').val()+','+$('#hstart').val()+','+$('#hstop').val());
         microgear.publish ("/sp", $('#sp_1').val()+','+$('#sp_2').val()+','+$('#sp_3').val()+','+$('#ton').val()+','+$('#toff').val()+','+$('#hstart').val()+','+$('#hstop').val());
     });
+
+    var gM1 = new JustGage({
+        id: "gaugeM1",
+        value:0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Zone A",
+        label:"%",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+    var gM2 = new JustGage({
+        id: "gaugeM2",
+        value:0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Zone B",
+        label:"%",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+    var gM3 = new JustGage({
+        id: "gaugeM3",
+        value:0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Zone C",
+        label:"%",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+    var gM4 = new JustGage({
+        id: "gaugeM4",
+        value:0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Zone D",
+        label:"%",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+    var gT = new JustGage({
+        id: "gaugeT",
+        value:0,
+        min: 0,
+        max: 60,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Temperature",
+        label:"C",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+    var gH = new JustGage({
+        id: "gaugeH",
+        value:0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Humidity",
+        label:"%",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
+
+
+
