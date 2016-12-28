@@ -100,7 +100,7 @@ def subscription(topic,message):
       splist[6] = str(hstop)
 
     message = ','.join(splist)
-    
+
     with open("config.ini", "w") as f:
       f.write(message) 
     
@@ -132,6 +132,8 @@ while True:
   msg += str(sp[0])+','+str(sp[1])+','+str(sp[2])+','+str(ton)+','+str(toff)+','+str(hstart)+','+str(hstop)+','
   msg += ser.readline()  
   print msg
+  with open("data.log", "w") as f:
+    f.write(msg) 
 
   datalist = msg.split(',')
   if len(datalist) == 18:
