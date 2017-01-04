@@ -17,7 +17,7 @@ for i in range(0,3) :
   GPIO.setup(valve_relay[i], GPIO.OUT)
   GPIO.output(valve_relay[i], False)
 
-
+# default value
 sp=[-1,-1,-1] # set point
 ton=10 # time on
 toff=5 # time off
@@ -28,6 +28,7 @@ hstart=8
 hstop=15
 mlist = [0.0,0.0,0.0]
 
+# read configuration file
 with open("config.ini", "r") as f:
   config = f.read()
   clist = config.split(',')
@@ -125,6 +126,8 @@ def checkMaxSpan(v):
   return span.index(max(span))
 
 while True:
+  y,m,d,h,mi,s,wd,wy,isd = time.localtime() 
+
   # data published format
   #       [-Relay Status] [-Set Point-] [--------Time---------] [--------Data--------]
   # msg = [pump,v1,v2,v3],[sp1,sp2,sp3],[ton,toff,hstart,hstop],[volt,m1,m2,m3,m4,t,h]
@@ -132,6 +135,7 @@ while True:
   msg += str(sp[0])+','+str(sp[1])+','+str(sp[2])+','+str(ton)+','+str(toff)+','+str(hstart)+','+str(hstop)+','
   msg += ser.readline()  
   print msg
+  # save data to data.log for thingspeak and line
   with open("data.log", "w") as f:
     f.write(msg) 
 
@@ -140,14 +144,16 @@ while True:
     microgear.publish("/data",msg)
     mlist = [float(datalist[12]),float(datalist[13]),float(datalist[14])] 
   
+  # pump on
   if pump_state == 0 and toff_cnt <= 0:
-    vno = checkMaxSpan(mlist)
-    if (mlist[vno] < sp[vno]) :
+    vno = checkMaxSpan(mlist) # select zone
+    if (mlist[vno] < sp[vno] and (h >= hstart and  h < hstop)) :
       pump_state = 1
       GPIO.output(valve_relay[vno], True)
       GPIO.output(pump_relay, True)
       ton_cnt = ton
 
+  #pump off
   elif pump_state == 1 and (mlist[vno] >= sp[vno] or ton_cnt <= 0):
     pump_state = 0
     GPIO.output(pump_relay, False)
