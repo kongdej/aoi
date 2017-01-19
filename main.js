@@ -1,9 +1,9 @@
 
-    const APPID = "AOI";
-    const KEY = "2x3jdjJoQMO1kEe";
-    const SECRET = "syVDI8OtKOJG71Fqmb3GB5YMj";
+    const APPID = "PudzaAOI";
+    const KEY = "cgHSEoApDvfToU8";
+    const SECRET = "9TfFbDZmavuqNAT5y77E2ZojP";
 
-    const ALIAS = "htmlgear";
+    const ALIAS = "WEBGEAR";
 
     var microgear = Microgear.create({
         key: KEY,
@@ -26,7 +26,7 @@
 
     microgear.on('message',function(topic,msg) {
         printMsg(topic,msg);
-        if (topic == "/AOI/data") {
+        if (topic == "/PudzaAOI/data") {
            var vals = msg.split(",");
            console.log(vals);
            if (vals[0] == '1') $('#r1_status').text('START'); else $('#r1_status').text('STOP');                

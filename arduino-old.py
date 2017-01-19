@@ -6,6 +6,15 @@ import requests
 import serial
 import RPi.GPIO as GPIO
 
+#line notify
+LINE_ACCESS_TOKEN="32xcreVbSqhuoOfPGfyIhji81k7PtKjnOmr1tz99h4L" #token
+url = "https://notify-api.line.me/api/notify"
+
+# Thingspeak
+urlThingspeak = "https://api.thingspeak.com/update.json"
+api_key_1 = "S9ZEMKADJDRSR4RX"
+api_key_2 = "FMZM64TP5E80JKMQ"
+
 # Raspery GPIO setup
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -46,9 +55,9 @@ with open("config.ini", "r") as f:
 ser = serial.Serial('/dev/ttyUSB0',9600)
 
 # NETPIE appid and apikeys
-appid = "PudzaAOI"
-gearkey = "gFW3MB3AF4PgVH1"
-gearsecret =  "khjSPATOn2fHDvnrYvVF8Ozbx"
+appid = "AOI"
+gearkey = "DZj0xtc6o8HrX7u"
+gearsecret =  "tFcW3484XcE7MydjMEOjVaYgi"
 
 microgear.create(gearkey,gearsecret,appid,{'debugmode': False})
 
@@ -58,7 +67,7 @@ def connection():
 def subscription(topic,message):
   global ton,toff,hstart,hstop
   #print topic+"="+message
-  if topic == "/PudzaAOI/cmd" :
+  if topic == "/AOI/cmd" :
     if message == '00':
       GPIO.output(pump_relay, False)
     elif message == '01':
@@ -76,7 +85,7 @@ def subscription(topic,message):
     elif message == '31':
       GPIO.output(valve_relay[2], True)
 
-  if topic == "/PudzaAOI/sp" :
+  if topic == "/AOI/sp" :
     splist = message.split(',')
     for i in range(0,3):
       if len(splist[i]) > 0:
@@ -106,14 +115,14 @@ def subscription(topic,message):
 
     message = ','.join(splist)
 
-    with open("/root/aoi/config.ini", "w") as f:
+    with open("config.ini", "w") as f:
       f.write(message)
       f.close() 
     
 def disconnect():
   print "disconnect is work"
 
-microgear.setalias("arduino")
+microgear.setalias("raspi")
 microgear.on_connect = connection
 microgear.on_message = subscription
 microgear.on_disconnect = disconnect
@@ -127,7 +136,7 @@ def checkMaxSpan(v):
   span = [0,0,0]
   for i in range(0,3) :
     span[i] = sp[i] - v[i]
-#  print "{0},{1},{2}".format(span[0],span[1],span[2])
+  print "{0},{1},{2}".format(span[0],span[1],span[2])
   return span.index(max(span))
 
 while True:
@@ -139,20 +148,52 @@ while True:
   msg = str(GPIO.input(pump_relay))+','+str(GPIO.input(valve_relay[0]))+','+str(GPIO.input(valve_relay[1]))+','+str(GPIO.input(valve_relay[2]))+','
   msg += str(sp[0])+','+str(sp[1])+','+str(sp[2])+','+str(ton)+','+str(toff)+','+str(hstart)+','+str(hstop)+','
   msg += ser.readline()  
-#  print msg
+  print msg
+  # save data to data.log for thingspeak and line
+  
+  #with open("data1.log", "w") as f:
+  #  f.write(msg)
+  #  f.close() 
+  #with open("data2.log", "w") as f:
+  #  f.write(msg)
+  #  f.close() 
 
   datalist = msg.split(',')
-
   if len(datalist) == 18:
     microgear.publish("/data",msg)
-    data = {"zoneX":datalist[12],"zoneY":datalist[13],"zoneZ":datalist[14],"zoneR":datalist[15],"battery":datalist[11],"temperature":datalist[16],"humidity":datalist[17],"pump":datalist[0]}
-    microgear.writeFeed("AOIFeed",data)
-
-    data = {"valve1":datalist[1],"valve2":datalist[2],"valve3":datalist[3]}
-    microgear.writeFeed("AOIFeed2",data)
-
     mlist = [float(datalist[12]),float(datalist[13]),float(datalist[14])]
     
+    # send thingspeak
+    if mi != prev_minute:
+      prev_minute = mi 
+      s = requests.Session();
+      payload = {'api_key': api_key_1, 'field1' : datalist[12],'field2' : datalist[13],'field3' : datalist[14],'field4' : datalist[15],'field5' : datalist[16],'field6' : datalist[17],'field7' : datalist[11]}
+      r = s.post(urlThingspeak,params=payload,verify=True)
+      print r
+      time.sleep(15)  
+      s = requests.Session();
+      payload = {'api_key': api_key_2, 'field1' : datalist[0],'field2' : datalist[1],'field3' : datalist[2],'field4' : datalist[3],'field5' : datalist[4],'field6' : datalist[5],'field7' : datalist[6]}
+      r = s.post(urlThingspeak,params=payload,verify=True)
+      print r
+
+    # send Line
+    
+    if h != prev_hour:
+      prev_hour = h
+      datas = "\n"
+      datas += "ZoneX: "+datalist[12]+"%\n"
+      datas += "ZoneY: "+datalist[13]+"%\n"
+      datas += "ZoneZ: "+datalist[14]+"%\n"
+      datas += "ZoneR: "+datalist[15]+"%\n"
+      datas += "Temperature: "+datalist[16]+"C\n"
+      datas += "Humidity: "+datalist[17]+""
+      datas += "BATT: "+datalist[11]+"v\n"
+      msg = {"message":datas} #message
+      LINE_HEADERS = {'Content-Type':'application/x-www-form-urlencoded',"Authorization":"Bearer "+LINE_ACCESS_TOKEN}
+      session = requests.Session()
+      resp = session.post(url, headers=LINE_HEADERS, data=msg)
+      print resp
+ 
   # pump on
   if pump_state == 0 and toff_cnt <= 0:
     vno = checkMaxSpan(mlist) # select zone
@@ -174,12 +215,12 @@ while True:
       toff_cnt = 0 
     else: 
       toff_cnt -= 1
-#    print "{0} OFF ({1})". format(vno,toff_cnt)
+    print "{0} OFF ({1})". format(vno,toff_cnt)
   else:
     if ton_cnt <= 0:
       ton_cnt = 0
     else:
       ton_cnt -= 1 
-#    print "{0} ON ({1})". format(vno,ton_cnt)
+    print "{0} ON ({1})". format(vno,ton_cnt)
 
   time.sleep(1)  
