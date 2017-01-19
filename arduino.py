@@ -9,8 +9,8 @@ import RPi.GPIO as GPIO
 # Raspery GPIO setup
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-pump_relay = 18
-valve_relay = [23,24,25]
+pump_relay = 25
+valve_relay = [18,23,24]
 
 GPIO.setup(pump_relay, GPIO.OUT)
 GPIO.output(pump_relay, False)
