@@ -52,7 +52,7 @@
             gM4.refresh(vals[15]);
             gT.refresh(vals[16]);
             gH.refresh(vals[17]);
-
+            gB.refresh(vals[11]);
          }
  
 
@@ -216,5 +216,19 @@
         titleFontFamily: "Arial"
       });
 
+    var gB = new JustGage({
+        id: "gaugeB",
+        value:0,
+        min: 0,
+        max: 18,
+        relativeGaugeSize: true,
+        gaugeWidthScale: 1,
+        decimals:2,
+        title: "Battery",
+        label:"V",
+        titlePosition: "below",
+        titleFontSize: "5px",
+        titleFontFamily: "Arial"
+      });
 
 
