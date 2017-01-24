@@ -179,7 +179,7 @@
         relativeGaugeSize: true,
         gaugeWidthScale: 1,
         decimals:2,
-        title: "Zone D",
+        title: "Zone R",
         label:"%",
         titlePosition: "below",
         titleFontSize: "5px",
