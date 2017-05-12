@@ -1,4 +1,4 @@
-# IFTTT
+# line and thingspeak
 import time
 import requests
 
